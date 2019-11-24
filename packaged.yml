@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'wlrnschedule
+
+  Sample SAM Template for wlrnschedule
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  WlrnScheduleAlexaLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://wlrnsam-dev/b42e1e0c10f5180356b7437d487d4114
+      Handler: schedule.handler
+      Runtime: ruby2.5
+      Events:
+        Alexa:
+          Type: AlexaSkill
+  WlrnScheduleCacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cache.handler
+      Runtime: ruby2.5
+      CodeUri: s3://wlrnsam-dev/333d83c5e8cc662483544100db27f33f
+      Events:
+        PersistCacheQueue:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::GetAtt:
+              - PersistCacheQueue
+              - Arn
+            BatchSize: 1
+  Cache:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: date
+        AttributeType: S
+      KeySchema:
+      - AttributeName: date
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  PersistCacheQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: PersistCacheQueue
+Outputs:
+  WlrnScheduleAlexaLambdaFunctionArn:
+    Description: Alexa Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - WlrnScheduleAlexaLambdaFunction
+      - Arn
+  WlrnScheduleAlexaLambdaFunctionIamRole:
+    Description: Implicit IAM Role created for Alexa Lambda function
+    Value:
+      Fn::GetAtt:
+      - WlrnScheduleAlexaLambdaFunctionRole
+      - Arn

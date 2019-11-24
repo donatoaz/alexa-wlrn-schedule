@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  wlrnschedule
+
+  Sample SAM Template for wlrnschedule
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  WlrnScheduleAlexaLambdaFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: schedule.handler
+      Runtime: ruby2.5
+      Events:
+        Alexa:
+          Type: AlexaSkill
+  WlrnScheduleCacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cache.handler
+      Runtime: ruby2.5
+      CodeUri: ./src
+      Events:
+        PersistCacheQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PersistCacheQueue.Arn
+            BatchSize: 1
+  Cache:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: date
+          AttributeType: S
+      KeySchema:
+        - AttributeName: date
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+        
+  # WlrnScheduleNewRequestSnsTopic:
+  #   Type: AWS::SNS::Topic
+  #   Properties:
+  #     DisplayName: WlrnScheduleNewRequestSnsTopic
+  #     Subscription: 
+  #       - Protocol: lambda
+  #         Endpoint: !GetAtt WlrnScheduleCacheFunction.Arn
+  #     TopicName: WlrnScheduleNewRequestSnsTopic
+
+  PersistCacheQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: PersistCacheQueue
+
+  # WlrnScheduleSAMPolicy: # https://github.com/awslabs/aws-sam-cli/issues/420
+  #   Type: AWS::IAM::Policy
+  #   Properties:
+  #     PolicyName: WlrnScheduleSAMPolicy
+  #     Groups:
+  #       - group
+  #     Roles:
+  #       - role
+  #     Users:
+  #       - user
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: "Allow"
+  #           Action:
+  #             - "s3:PutObject"
+  #             - "s3:GetObject"
+  #             - "s3:CreateMultipartUpload"
+  #           Resource:
+  #             - "arn:aws:s3:::{BUCKET_NAME}"
+  #             - "arn:aws:s3:::{BUCKET_NAME}/*"
+
+  #         - Effect: "Allow"
+  #           Action:
+  #             - "cloudformation:DescribeStacks"
+  #             - "cloudformation:CreateChangeSet"
+  #             - "cloudformation:ExecuteChangeSet"
+  #             - "cloudformation:DescribeChangeSet"
+  #           Resource:
+  #             - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/{STACK_NAME}/*"
+  #             - "arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31"
+
+  #         - Effect: "Allow"
+  #           Action:
+  #             - "cloudformation:GetTemplateSummary"
+  #           Resource: "*"
+
+  #         - Effect: "Allow"
+  #           Action:
+  #             - "iam:GetRole"
+  #           Resource:
+  #             - !Sub "arn:aws:iam::${AWS::AccountId}:role/{STACK_NAME}-{FUNCTION_NAME}Role-*"
+
+  #         - Effect: "Allow"
+  #           Action:
+  #             - "lambda:UpdateFunctionCode"
+  #             - "lambda:ListTags"
+  #             - "lambda:TagResource"
+  #             - "lambda:UntagResource"
+  #             - "lambda:GetFunctionConfiguration"
+  #           Resource:
+  #             - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:{STACK_NAME}-{FUNCTION_NAME}-*"
+
+Outputs:
+  WlrnScheduleAlexaLambdaFunctionArn:
+    Description: "Alexa Lambda Function ARN"
+    Value: !GetAtt WlrnScheduleAlexaLambdaFunction.Arn
+  WlrnScheduleAlexaLambdaFunctionIamRole:
+    Description: "Implicit IAM Role created for Alexa Lambda function"
+    Value: !GetAtt WlrnScheduleAlexaLambdaFunctionRole.Arn
