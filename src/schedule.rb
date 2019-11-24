@@ -11,7 +11,7 @@ CACHE = 'CACHE_TABLE'.freeze
 MIAMI_TZ = '-05:00'.freeze
 DATE_FORMAT = '%Y-%m-%d'.freeze
 
-def handler(event:, _context:)
+def handler(event:, context:)
   request = event['request']
   intent = Intent.new
 
@@ -85,11 +85,11 @@ class Intent
 
     return day_flip_error if coming_up && current_program[:next].nil?
 
-    reply = "<speak>#{current_program[:program]['name']}is playing now " \
+    reply = "<speak>#{program_name(current_program)} is playing now " \
       "until <say-as interpret-as=\"time\">#{current_program[:end_time]}</say-as> Miami time</speak>"
 
     if coming_up
-      reply ="<speak>#{current_program[:next][:program]['name']} will be on starting at " \
+      reply = "<speak>#{program_name(current_program[:next])} will be on, starting at " \
         "<say-as interpret-as=\"time\">#{current_program[:next][:start_time]}</say-as> Miami time</speak>"
     end
 
@@ -230,5 +230,13 @@ class Intent
     end
 
     nil
+  end
+
+  def escape_string(string)
+    string.gsub('&', 'and')
+  end
+
+  def program_name(program)
+    escape_string(program[:program]['name'])
   end
 end
