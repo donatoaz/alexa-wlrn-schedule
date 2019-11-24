@@ -16,7 +16,7 @@ Resources:
   WlrnScheduleAlexaLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://wlrnsam-dev/50600960320c1c964f4713f33f60df2a
+      CodeUri: s3://wlrnsam-dev/a6730e0dec779e2fcce5b7f9955c0d53
       Handler: schedule.handler
       Runtime: ruby2.5
       Environment:
@@ -50,7 +50,7 @@ Resources:
     Properties:
       Handler: cache.handler
       Runtime: ruby2.5
-      CodeUri: s3://wlrnsam-dev/b0d58c6aaa3fb87f7ac5ce4492643d40
+      CodeUri: s3://wlrnsam-dev/55015d90c2404362348b7cb932d7bce8
       Environment:
         Variables:
           DEBUG_QUEUE_URL:

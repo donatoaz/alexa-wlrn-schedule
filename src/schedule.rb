@@ -20,8 +20,8 @@ def handler(event:, context:)
     intent.launch
   when 'IntentRequest'
     case request['intent']['name']
-    when 'Schedule'            then intent.schedule(event, context)
-    when 'NextOn'              then intent.schedule_next(event, context)
+    when 'Schedule'            then intent.schedule_now
+    when 'NextOn'              then intent.schedule_next
     when 'AMAZON.HelpIntent'   then intent.help
     when 'AMAZON.CancelIntent' then intent.cancel
     when 'AMAZON.StopIntent'   then intent.stop
@@ -30,11 +30,15 @@ def handler(event:, context:)
 end
 
 class Intent
-  def schedule(event, context)
-    sqs = Aws::SQS::Client.new(region: REGION)
-    sqs.send_message(queue_url: ENV.fetch('DEBUG_QUEUE_URL'),
-                     message_body: { event: event, context: context }.to_json)
+  def schedule_now
+    schedule
+  end
 
+  def schedule_next
+    schedule(coming_up: true)
+  end
+
+  def schedule(coming_up: false)
     now = Time.now.getlocal(MIAMI_TZ)
     response = nil
 
@@ -66,11 +70,11 @@ class Intent
     if response.nil?
       response = request_schedule(now)
 
-      # Notify NewRequest sns topic (used for caching and analytics)
-      sns = Aws::SNS::Resource.new(region: REGION)
-      topic_arn = ENV.fetch('NEW_REQUEST_SNS_TOPIC_ARN')
-      topic = sns.topic(topic_arn)
-      topic.publish(message: response)
+      # # Notify NewRequest sns topic (used for caching and analytics)
+      # sns = Aws::SNS::Resource.new(region: REGION)
+      # topic_arn = ENV.fetch('NEW_REQUEST_SNS_TOPIC_ARN')
+      # topic = sns.topic(topic_arn)
+      # topic.publish(message: response)
     end
 
     return failed_to_get_response_from_npr unless response
@@ -79,13 +83,22 @@ class Intent
     schedule = parse_response_for_schedule(response)
     current_program = get_program_by_time(schedule, now)
 
+    return day_flip_error if coming_up && current_program[:next].nil?
+
+    reply = "<speak>#{current_program[:program]['name']}is playing now " \
+      "until <say-as interpret-as=\"time\">#{current_program[:end_time]}</say-as> Miami time</speak>"
+
+    if coming_up
+      reply ="<speak>#{current_program[:next][:program]['name']} will be on starting at " \
+        "<say-as interpret-as=\"time\">#{current_program[:next][:start_time]}</say-as> Miami time</speak>"
+    end
+
     JSON.generate(
       version: 1.0,
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: "<speak>#{current_program[:program]['name']} is playing now " \
-                "until <say-as interpret-as=\"time\">#{current_program[:end_time]}</say-as></speak>"
+          ssml: reply
         },
         shouldEndSession: true
       }
@@ -98,11 +111,15 @@ class Intent
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>Welcome to WLRN schedule. You can ask me things like: what is playing now? Or ask me what will play next.</speak>'
+          ssml: '<speak>Welcome to WLRN schedule. I can tell you what is playing now or you  can ask me what will play next.</speak>'
         },
         shouldEndSession: false
       }
     )
+  end
+
+  def day_flip_error
+    error_message('We are working on day flips. Hang tight for updates.')
   end
 
   def error_message(message)
@@ -124,19 +141,6 @@ class Intent
 
   def error_reading_cache
     error_message('Sorry, there was an error. The lazy developer has been notified and will fix it ASAP.')
-  end
-
-  def schedule_next(event, context)
-    JSON.generate(
-      version: 1.0,
-      response: {
-        outputSpeech: {
-          type: 'SSML',
-          ssml: '<speak>This works</speak>'
-        },
-        shouldEndSession: true
-      }
-    )
   end
 
   def help
@@ -191,14 +195,22 @@ class Intent
   def parse_response_for_schedule(body)
     events = JSON.parse(body)['onToday']
 
-    events.reduce({}) do |schedule, event|
+    programs = events.reduce({}) do |schedule, event|
       schedule.merge(
         event['start_time'] => {
+          start_time: event['start_time'],
           end_time: event['end_time'],
           program: event['program']
         }
       )
     end
+
+    ordered_start_times = programs.keys.sort
+    ordered_start_times.each_with_index do |start_time, index|
+      programs[start_time][:next] = programs[ordered_start_times[index + 1]]
+    end
+
+    programs
   end
 
   def get_program_by_time(sch, time)

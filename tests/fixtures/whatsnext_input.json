@@ -1,0 +1,89 @@
+{
+	"version": "1.0",
+	"session": {
+		"new": false,
+		"sessionId": "amzn1.echo-api.session.300eaa6c-ef65-4398-a90b-89cce3bc2d3d",
+		"application": {
+			"applicationId": "amzn1.ask.skill.b7422f25-b7d0-452f-a7f5-1155895320d2"
+		},
+		"user": {
+			"userId": "amzn1.ask.account.AHB66OKRYL7P25KJRNEIVTOZVMERI5EXA3D7GA3MX4ORVRI2FVIR6OTKXLBEMMD44OEORMGMRWXW2QHDPK722CXCRXQ2T6W4J3COGWFMFOSXTWX7NEKFE4MWRVUQZCGTV2KTUGNLVCYH4LPUOUK5H2JY6TPFKHPYJG7HNKREUOZKDNN5KURCYVTVYXMUQMPMAPKPMJCTI3EJMLA"
+		}
+	},
+	"context": {
+		"System": {
+			"application": {
+				"applicationId": "amzn1.ask.skill.b7422f25-b7d0-452f-a7f5-1155895320d2"
+			},
+			"user": {
+				"userId": "amzn1.ask.account.AHB66OKRYL7P25KJRNEIVTOZVMERI5EXA3D7GA3MX4ORVRI2FVIR6OTKXLBEMMD44OEORMGMRWXW2QHDPK722CXCRXQ2T6W4J3COGWFMFOSXTWX7NEKFE4MWRVUQZCGTV2KTUGNLVCYH4LPUOUK5H2JY6TPFKHPYJG7HNKREUOZKDNN5KURCYVTVYXMUQMPMAPKPMJCTI3EJMLA"
+			},
+			"device": {
+				"deviceId": "amzn1.ask.device.AEOY35M35JVOIRZ7JE6HCTFO6WERIOLZTFHYCTAZ4NU4LQILYQPIGMIB74MNOGA7GGC6PDFZ4Q4ICPLECE5KBQQFTYCKL24Y46WHINOM2UDPSU7CR2GEWDV35SB67KFSSQWIGQD3TK2Q5DZ55ZUZRRQKTMNOHJQVFGUHAGYS6JBS43CVCFAUS",
+				"supportedInterfaces": {}
+			},
+			"apiEndpoint": "https://api.amazonalexa.com",
+			"apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLmI3NDIyZjI1LWI3ZDAtNDUyZi1hN2Y1LTExNTU4OTUzMjBkMiIsImV4cCI6MTU3NDYwNTU4NiwiaWF0IjoxNTc0NjA1Mjg2LCJuYmYiOjE1NzQ2MDUyODYsInByaXZhdGVDbGFpbXMiOnsiY29udGV4dCI6IkFBQUFBQUFBQUFBWmJ3NTZKMkRVWHBzNllSTzc5R21vS3dFQUFBQUFBQUFIeEl5RmwvRE5lR2lJWFZkWnBOYjE0QS82S0hGTU5GWlhIYk5ieVluT3k2b1JJa1RqZ3JyMTZOQ3pvMjZBNEc2S0Q2UTRLa2l0T0k0SzE2V2xvaXJhRG9pY2JCZnNzZjRUMWZtQ2VmNXEvd3J4emxoelczVkJXWlJOSzJBVERhdXZ6WHNlZ2wxL0NENjV3RUFtdE5yMGJsRE9zMTlKTUs3bXpMejdyclJuTWpjTG9CNTYzQlMva3FDRTk1NG1XVnlJTDk5aENYbDcwb1U3Sk5Ld3dkbC9YcjlGVm9CWGpDS1h5Qzg3NThpYkdndHR0UmoyRHRBbENCSHd0bnpicW1MclZIVU9ScVVGdTMrckw1VzJQazNlVUdETFBFemxIQ2NaTkQ3bTVxSHNtMElla2VhL1BERi9OSDROOStUM1pyY3BoU0ZJTHFaT3ZPVVVESzVRelpFcDl5SjhLZ2hZODJpc3ZMeDFJQXBPbThNMXlPU0pHRWZrYkk5SXlFUnpHTkQ2THVBUnNwekNxcUV6eWc9PSIsImNvbnNlbnRUb2tlbiI6bnVsbCwiZGV2aWNlSWQiOiJhbXpuMS5hc2suZGV2aWNlLkFFT1kzNU0zNUpWT0lSWjdKRTZIQ1RGTzZXRVJJT0xaVEZIWUNUQVo0TlU0TFFJTFlRUElHTUlCNzRNTk9HQTdHR0M2UERGWjRRNElDUExFQ0U1S0JRUUZUWUNLTDI0WTQ2V0hJTk9NMlVEUFNVN0NSMkdFV0RWMzVTQjY3S0ZTU1FXSUdRRDNUSzJRNURaNTVaVVpSUlFLVE1OT0hKUVZGR1VIQUdZUzZKQlM0M0NWQ0ZBVVMiLCJ1c2VySWQiOiJhbXpuMS5hc2suYWNjb3VudC5BSEI2Nk9LUllMN1AyNUtKUk5FSVZUT1pWTUVSSTVFWEEzRDdHQTNNWDRPUlZSSTJGVklSNk9US1hMQkVNTUQ0NE9FT1JNR01SV1hXMlFIRFBLNzIyQ1hDUlhRMlQ2VzRKM0NPR1dGTUZPU1hUV1g3TkVLRkU0TVdSVlVRWkNHVFYyS1RVR05MVkNZSDRMUFVPVUs1SDJKWTZUUEZLSFBZSkc3SE5LUkVVT1pLRE5ONUtVUkNZVlRWWVhNVVFNUE1BUEtQTUpDVEkzRUpNTEEifX0.WNdwjZV6WmlU4XSAPJeVwDAdNi-ZQmpPNmsrXCKmgNo5nnD9fzW-cpC2w8jdXQYjB5uq1heICJHsOAFxJqIwVnEGXnYZrFYsYduglorfw-NPP8J3wCwkqEJRCd2sv3A8RZL7Eo9c2H414vXIdVZbuMVhd4R_eo39NOvxp3dxDR-hE4R3Wocqzug8dq4Xiyt_KEBbY90GY7twPpsWKG_RBql70MYMjd1vGl8ImxWuEr34_LS67H3Exo-5KuQs0hIfM8eOBnyFeEASDR40U0yWqdOpymo6_ajhbbgqGKCLy3rKW3KFfSMezTfZSbcKCZpT6_wrfe7_WrP_FFLP8AzReA"
+		},
+		"Viewport": {
+			"experiences": [
+				{
+					"arcMinuteWidth": 246,
+					"arcMinuteHeight": 144,
+					"canRotate": false,
+					"canResize": false
+				}
+			],
+			"shape": "RECTANGLE",
+			"pixelWidth": 1024,
+			"pixelHeight": 600,
+			"dpi": 160,
+			"currentPixelWidth": 1024,
+			"currentPixelHeight": 600,
+			"touch": [
+				"SINGLE"
+			],
+			"video": {
+				"codecs": [
+					"H_264_42",
+					"H_264_41"
+				]
+			}
+		},
+		"Viewports": [
+			{
+				"type": "APL",
+				"id": "main",
+				"shape": "RECTANGLE",
+				"dpi": 160,
+				"presentationType": "STANDARD",
+				"canRotate": false,
+				"configuration": {
+					"current": {
+						"video": {
+							"codecs": [
+								"H_264_42",
+								"H_264_41"
+							]
+						},
+						"size": {
+							"type": "DISCRETE",
+							"pixelWidth": 1024,
+							"pixelHeight": 600
+						}
+					}
+				}
+			}
+		]
+	},
+	"request": {
+		"type": "IntentRequest",
+		"requestId": "amzn1.echo-api.request.78116efa-6166-4958-a2a0-bc8d909e17e9",
+		"timestamp": "2019-11-24T14:21:26Z",
+		"locale": "en-US",
+		"intent": {
+			"name": "NextOn",
+			"confirmationStatus": "NONE"
+		}
+	}
+}
