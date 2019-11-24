@@ -11,7 +11,7 @@ CACHE = 'CACHE_TABLE'.freeze
 MIAMI_TZ = '-05:00'.freeze
 DATE_FORMAT = '%Y-%m-%d'.freeze
 
-def handler(event:, context:)
+def handler(event:, _context:)
   request = event['request']
   intent = Intent.new
 
