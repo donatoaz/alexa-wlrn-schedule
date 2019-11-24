@@ -9,30 +9,78 @@ Globals:
   Function:
     Timeout: 3
 Resources:
+  DebugQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: DebugQueue
   WlrnScheduleAlexaLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://wlrnsam-dev/b42e1e0c10f5180356b7437d487d4114
+      CodeUri: s3://wlrnsam-dev/50600960320c1c964f4713f33f60df2a
       Handler: schedule.handler
       Runtime: ruby2.5
+      Environment:
+        Variables:
+          WLRN_URL: https://api.composer.nprstations.org/v1/widget/5187f4c7e1c8a450fdefbbd8/day?format=json&date=
+          DEBUG_QUEUE_URL:
+            Ref: DebugQueue
+          CACHE_TABLE:
+            Ref: Cache
+          NEW_REQUEST_SNS_TOPIC_ARN:
+            Ref: NewRequestSNSTopic
       Events:
         Alexa:
           Type: AlexaSkill
+      Policies:
+      - SQSSendMessagePolicy:
+          QueueName:
+            Fn::GetAtt:
+            - DebugQueue
+            - QueueName
+      - DynamoDBReadPolicy:
+          TableName:
+            Ref: Cache
+      - SNSPublishMessagePolicy:
+          TopicName:
+            Fn::GetAtt:
+            - NewRequestSNSTopic
+            - TopicName
   WlrnScheduleCacheFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: cache.handler
       Runtime: ruby2.5
-      CodeUri: s3://wlrnsam-dev/333d83c5e8cc662483544100db27f33f
+      CodeUri: s3://wlrnsam-dev/b0d58c6aaa3fb87f7ac5ce4492643d40
+      Environment:
+        Variables:
+          DEBUG_QUEUE_URL:
+            Ref: DebugQueue
+          CACHE_TABLE:
+            Ref: Cache
       Events:
-        PersistCacheQueue:
-          Type: SQS
+        NewRequestEvent:
+          Type: SNS
           Properties:
-            Queue:
-              Fn::GetAtt:
-              - PersistCacheQueue
-              - Arn
-            BatchSize: 1
+            Topic:
+              Ref: NewRequestSNSTopic
+      Policies:
+      - SQSSendMessagePolicy:
+          QueueName:
+            Fn::GetAtt:
+            - DebugQueue
+            - QueueName
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: Cache
+      - SNSCrudPolicy:
+          TopicName:
+            Fn::GetAtt:
+            - NewRequestSNSTopic
+            - TopicName
+  NewRequestSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: NewRequestSNSTopic
   Cache:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -45,10 +93,17 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
-  PersistCacheQueue:
-    Type: AWS::SQS::Queue
+  WlrnScheduleNewRequestSnsTopic:
+    Type: AWS::SNS::Topic
     Properties:
-      QueueName: PersistCacheQueue
+      DisplayName: WlrnScheduleNewRequestSnsTopic
+      Subscription:
+      - Protocol: lambda
+        Endpoint:
+          Fn::GetAtt:
+          - WlrnScheduleCacheFunction
+          - Arn
+      TopicName: WlrnScheduleNewRequestSnsTopic
 Outputs:
   WlrnScheduleAlexaLambdaFunctionArn:
     Description: Alexa Lambda Function ARN
@@ -61,4 +116,10 @@ Outputs:
     Value:
       Fn::GetAtt:
       - WlrnScheduleAlexaLambdaFunctionRole
+      - Arn
+  DebugQueueArn:
+    Description: Debug queue ARN
+    Value:
+      Fn::GetAtt:
+      - DebugQueue
       - Arn

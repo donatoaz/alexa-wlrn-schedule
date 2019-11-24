@@ -1,21 +1,6 @@
 # wlrnschedule
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
-
-- hello_world - Code for the application's Lambda function.
-- events - Invocation events that you can use to invoke the function.
-- tests - Unit tests for the application code. 
-- template.yaml - A template that defines the application's AWS resources.
-
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
-
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
-The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
-
-* [PyCharm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
-* [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+This is an Alexa skill for WLRN radio now playing information.
 
 ## Deploy the sample application
 
@@ -28,18 +13,32 @@ To use the SAM CLI, you need the following tools.
 * Ruby - [Install Ruby 2.5](https://www.ruby-lang.org/en/documentation/installation/)
 * Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
 
+Make sure you have your credentials set up, in the examples below a profile named `wlrnsamuser` is used, as in the `~/.aws/config` has the following:
+
+```
+[profile wlrnsamuser]
+aws_access_key_id = xxxx
+aws_secret_access_key = yyyy
+region = us-east-1
+```
+
 The SAM CLI uses an Amazon S3 bucket to store your application's deployment artifacts. If you don't have a bucket suitable for this purpose, create one. Replace `BUCKET_NAME` in the commands in this section with a unique bucket name.
 
 ```bash
-wlrnschedule$ aws s3 mb s3://BUCKET_NAME
+wlrnschedule$ aws s3 mb s3://BUCKET_NAME --profile wlrnsamuser
+```
+
+Since this package uses vended dependencies (namely [HTTParty](https://github.com/jnunemaker/httparty)) we need to build the application with the `--use-container` option. For more details, run the command with the `--debug` flag.
+
+```
+wlrnschedule$ sam build --profile wlrnsamuser --use-container
 ```
 
 To prepare the application for deployment, use the `sam package` command.
 
 ```bash
-wlrnschedule$ sam package \
-    --output-template-file packaged.yaml \
-    --s3-bucket BUCKET_NAME
+wlrnschedule$ sam package --s3-bucket BUCKET_NAME \
+  --output-template-file packaged.yml --profile wlrnsamuser
 ```
 
 The SAM CLI creates deployment packages, uploads them to the S3 bucket, and creates a new version of the template that refers to the artifacts in the bucket. 
@@ -48,55 +47,14 @@ To deploy the application, use the `sam deploy` command.
 
 ```bash
 wlrnschedule$ sam deploy \
-    --template-file packaged.yaml \
-    --stack-name wlrnschedule \
-    --capabilities CAPABILITY_IAM
+  --template-file /Users/donato/src/study/alexa/wlrnschedule/packaged.yml \
+  --stack-name STACK_NAME \
+  --capabilities CAPABILITY_IAM \
+  --profile wlrnsamuser \
+  --role-arn arn:aws:iam::846282225459:role/WlrnScheduleSAMRole
 ```
 
-After deployment is complete you can run the following command to retrieve the API Gateway Endpoint URL:
-
-```bash
-wlrnschedule$ aws cloudformation describe-stacks \
-    --stack-name wlrnschedule \
-    --query 'Stacks[].Outputs[?OutputKey==`HelloWorldApi`]' \
-    --output table
-``` 
-
-## Use the SAM CLI to build and test locally
-
-Build your application with the `sam build` command.
-
-```bash
-wlrnschedule$ sam build
-```
-
-The SAM CLI installs dependencies defined in `hello_world/Gemfile`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
-
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
-
-Run functions locally and invoke them with the `sam local invoke` command.
-
-```bash
-wlrnschedule$ sam local invoke HelloWorldFunction --event events/event.json
-```
-
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
-
-```bash
-wlrnschedule$ sam local start-api
-wlrnschedule$ curl http://localhost:3000/
-```
-
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
-
-```yaml
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-```
+After deployment you can plug in the `WlrnScheduleAlexaLambdaFunctionArn` into your Alexa Skills under Build > Endpoints
 
 ## Add a resource to your application
 The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
@@ -114,6 +72,8 @@ wlrnschedule$ sam logs -n HelloWorldFunction --stack-name wlrnschedule --tail
 You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
 
 ## Unit tests
+
+**TO DO**
 
 Tests are defined in the `tests` folder in this project.
 
