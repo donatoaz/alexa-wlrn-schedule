@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Starting dockerd"
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2&
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+  pre_build:
+    commands:
+      - echo "nothing to do on pre-build"
+  build:
+    commands:
+      - echo "Building with dependencies"
+      - docker run --rm -v $PWD:/var/layer -w /var/layer lambci/lambda:build-ruby2.5 bundle install --path=src/vendor/bundle --deployment
+  post_build:
+    commands:
+      - echo "nothing to do on post-build"
+      - echo "build completed on `date`"
+
+artifacts:
+  files:
+    - '**/*'

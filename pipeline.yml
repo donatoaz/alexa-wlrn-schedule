@@ -65,6 +65,22 @@ Resources:
   #   #   VersioningConfiguration:
   #   #     Status: Enabled
 
+  BuildDepsProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "${ServiceName}_deps"
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: docker:dind
+        PrivilegedMode: true
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-deps.yml
+
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -145,7 +161,21 @@ Resources:
                 - Name: SourceCode
               OutputArtifacts:
                 - Name: TestedSourceCode
-        - Name: Build
+        - Name: Deps
+          Actions:
+            - Name: CodeBuild
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref BuildDepsProject
+              InputArtifacts:
+                - Name: TestedSourceCode
+              OutputArtifacts:
+                - Name: SourceWithDeps
+        - Name: Package
           Actions:
             - Name: CodeBuild
               ActionTypeId:
@@ -156,7 +186,7 @@ Resources:
               Configuration:
                 ProjectName: !Ref CodeBuildProject
               InputArtifacts:
-                - Name: TestedSourceCode
+                - Name: SourceWithDeps
               OutputArtifacts:
                 - Name: Built
         - Name: Deploy
@@ -214,10 +244,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Resource:
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_build"
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_build:*"
                   - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_test"
                   - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_test:*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_deps"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_deps:*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_build"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_build:*"
                 Action:
                   - "logs:CreateLogGroup"
                   - "logs:CreateLogStream"
