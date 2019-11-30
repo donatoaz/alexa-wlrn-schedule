@@ -44,7 +44,7 @@ class ScheduleTest < Test::Unit::TestCase
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>This American Life is playing now until <say-as interpret-as="time">11:00</say-as> Miami time</speak>'
+          ssml: '<speak>This American Life is playing now until <say-as interpret-as="time">11:00 am</say-as> Miami time</speak>'
         },
         shouldEndSession: true
       }
@@ -57,7 +57,7 @@ class ScheduleTest < Test::Unit::TestCase
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>Freakonomics Radio will be on, starting at <say-as interpret-as="time">11:00</say-as> Miami time</speak>'
+          ssml: '<speak>Freakonomics Radio will be on, starting at <say-as interpret-as="time">11:00 am</say-as> Miami time</speak>'
         },
         shouldEndSession: true
       }
@@ -70,7 +70,7 @@ class ScheduleTest < Test::Unit::TestCase
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>Folk and Acoustic Music with Michael Stock is playing now until <say-as interpret-as="time">17:00</say-as> Miami time</speak>'
+          ssml: '<speak>Folk and Acoustic Music with Michael Stock is playing now until <say-as interpret-as="time">05:00 pm</say-as> Miami time</speak>'
         },
         shouldEndSession: true
       }
@@ -109,7 +109,7 @@ class ScheduleTest < Test::Unit::TestCase
   def test_schedule_handler
     url = ENV.fetch('WLRN_URL') + '2019-11-24'
     HTTParty.expects(:get).with(url).returns(mock_response)
-    Time.expects(:now).returns(ten_am_in_miami)
+    Time.expects(:now).at_least_once.returns(ten_am_in_miami)
 
     Aws::DynamoDB::Client.expects(:new).with(region: REGION).returns(mock_dynamo)
     assert_equal(expected_schedule_result, handler(event: schedule_event, context: ''))
@@ -118,7 +118,7 @@ class ScheduleTest < Test::Unit::TestCase
   def test_schedule_next_handler
     url = ENV.fetch('WLRN_URL') + '2019-11-24'
     HTTParty.expects(:get).with(url).returns(mock_response)
-    Time.expects(:now).returns(ten_am_in_miami)
+    Time.expects(:now).at_least_once.returns(ten_am_in_miami)
 
     Aws::DynamoDB::Client.expects(:new).with(region: REGION).returns(mock_dynamo)
     assert_equal(expected_schedule_next_result, handler(event: schedule_next_event, context: ''))
@@ -127,7 +127,7 @@ class ScheduleTest < Test::Unit::TestCase
   def test_schedule_invalid_character
     url = ENV.fetch('WLRN_URL') + '2019-11-24'
     HTTParty.expects(:get).with(url).returns(mock_response)
-    Time.expects(:now).returns(one_pm_in_miami)
+    Time.expects(:now).at_least_once.returns(one_pm_in_miami)
 
     Aws::DynamoDB::Client.expects(:new).with(region: REGION).returns(mock_dynamo)
     assert_equal(expected_schedule_result_escaped_characters, handler(event: schedule_event, context: ''))

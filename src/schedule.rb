@@ -86,11 +86,11 @@ class Intent
     return day_flip_error if coming_up && current_program[:next].nil?
 
     reply = "<speak>#{program_name(current_program)} is playing now " \
-      "until <say-as interpret-as=\"time\">#{current_program[:end_time]}</say-as> Miami time</speak>"
+      "until <say-as interpret-as=\"time\">#{convert_to_am_pm(current_program[:end_time])}</say-as> Miami time</speak>"
 
     if coming_up
       reply = "<speak>#{program_name(current_program[:next])} will be on, starting at " \
-        "<say-as interpret-as=\"time\">#{current_program[:next][:start_time]}</say-as> Miami time</speak>"
+        "<say-as interpret-as=\"time\">#{convert_to_am_pm(current_program[:next][:start_time])}</say-as> Miami time</speak>"
     end
 
     JSON.generate(
@@ -238,5 +238,9 @@ class Intent
 
   def program_name(program)
     escape_string(program[:program]['name'])
+  end
+
+  def convert_to_am_pm(time_string)
+    Time.strptime(time_string, '%H:%M').strftime('%0l:%M %P')
   end
 end
