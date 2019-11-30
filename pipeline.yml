@@ -81,6 +81,28 @@ Resources:
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Source:
         Type: CODEPIPELINE
+  
+  CodeBuildUnitTest:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "${ServiceName}_test"
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-test.yml
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Sub "aws/codebuild/${CodeBuildEnvironment}"
+        EnvironmentVariables:
+          - Name: CACHE_TABLE
+            Value: ''
+          - Name: NEW_REQUEST_SNS_TOPIC_ARN
+            Value: ''
+          - Name: WLRN_URL
+            Value: https://api.composer.nprstations.org/v1/widget/5187f4c7e1c8a450fdefbbd8/day?format=json&date=
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
 
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -109,6 +131,20 @@ Resources:
                 PollForSourceChanges: false
                 OAuthToken: !Ref GitHubOAuthToken
               RunOrder: 1
+        - Name: Test
+          Actions:
+            - Name: CodeBuild
+              ActionTypeId:
+                Category: Test
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref CodeBuildUnitTest
+              InputArtifacts:
+                - Name: SourceCode
+              OutputArtifacts:
+                - Name: TestedSourceCode
         - Name: Build
           Actions:
             - Name: CodeBuild
@@ -120,7 +156,7 @@ Resources:
               Configuration:
                 ProjectName: !Ref CodeBuildProject
               InputArtifacts:
-                - Name: SourceCode
+                - Name: TestedSourceCode
               OutputArtifacts:
                 - Name: Built
         - Name: Deploy
@@ -180,6 +216,8 @@ Resources:
                 Resource:
                   - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_build"
                   - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_build:*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_test"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ServiceName}_test:*"
                 Action:
                   - "logs:CreateLogGroup"
                   - "logs:CreateLogStream"

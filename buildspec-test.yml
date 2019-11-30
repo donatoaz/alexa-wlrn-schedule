@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      ruby: 2.6
+    commands:
+      - echo "installing deps"
+      - gem install bundler:2.0.1
+      - bundle install --with test
+  pre_build:
+    commands:
+      - echo "nothing to do on pre-build"
+  build:
+    commands:
+      - echo "Starting unit test `date` in `pwd`"
+      - ruby -I tests tests/unit/test_handler.rb
+  post_build:
+    commands:
+      - echo "build completed on `date`"
+
+artifacts:
+  files:
+    - '**/*'
