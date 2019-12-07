@@ -8,10 +8,10 @@ The Serverless Application Model Command Line Interface (SAM CLI) is an extensio
 
 To use the SAM CLI, you need the following tools.
 
-* AWS CLI - [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and [configure it with your AWS credentials].
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* Ruby - [Install Ruby 2.5](https://www.ruby-lang.org/en/documentation/installation/)
-* Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+- AWS CLI - [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and [configure it with your AWS credentials].
+- SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+- Ruby - [Install Ruby 2.5](https://www.ruby-lang.org/en/documentation/installation/)
+- Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
 
 Make sure you have your credentials set up, in the examples below a profile named `wlrnsamuser` is used, as in the `~/.aws/config` has the following:
 
@@ -41,7 +41,7 @@ wlrnschedule$ sam package --s3-bucket BUCKET_NAME \
   --output-template-file packaged.yml --profile wlrnsamuser
 ```
 
-The SAM CLI creates deployment packages, uploads them to the S3 bucket, and creates a new version of the template that refers to the artifacts in the bucket. 
+The SAM CLI creates deployment packages, uploads them to the S3 bucket, and creates a new version of the template that refers to the artifacts in the bucket.
 
 To deploy the application, use the `sam deploy` command.
 
@@ -57,6 +57,7 @@ wlrnschedule$ sam deploy \
 After deployment you can plug in the `WlrnScheduleAlexaLambdaFunctionArn` into your Alexa Skills under Build > Endpoints
 
 ## Add a resource to your application
+
 The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
 
 ## Fetch, tail, and filter Lambda function logs
@@ -98,5 +99,7 @@ Next, you can use AWS Serverless Application Repository to deploy ready to use A
 
 ## TODO
 
-* Add CI
-* Add CD with [github actions](https://github.com/apex/actions/tree/master/aws/sam)
+- [x] Add CI
+- [x] Add CD
+- [] Add proper caching
+- [] Add show time alerts (via alexa notifications)

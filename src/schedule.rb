@@ -112,11 +112,11 @@ class Intent
     if response.nil?
       response = request_schedule(now)
 
-      # # Notify NewRequest sns topic (used for caching and analytics)
-      # sns = Aws::SNS::Resource.new(region: REGION)
-      # topic_arn = ENV.fetch('NEW_REQUEST_SNS_TOPIC_ARN')
-      # topic = sns.topic(topic_arn)
-      # topic.publish(message: response)
+      # Notify NewRequest sns topic (used for caching and analytics)
+      sns = Aws::SNS::Resource.new(region: REGION)
+      topic_arn = ENV.fetch('NEW_REQUEST_SNS_TOPIC_ARN')
+      topic = sns.topic(topic_arn)
+      topic.publish(message: response)
     end
 
     return failed_to_get_response_from_npr unless response
