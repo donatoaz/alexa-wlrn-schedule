@@ -67,6 +67,29 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt NewRequestSNSTopic.TopicName
 
+  WlrnScheduleCacheShowsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cache_shows.handler
+      Runtime: ruby2.5
+      CodeUri: ./src
+      Environment:
+        Variables:
+          DEBUG_QUEUE_URL: !Ref DebugQueue
+          CACHE_TABLE: !Ref ShowDB
+      Events:
+        NewRequestEvent:
+          Type: SNS
+          Properties:
+            Topic: !Ref NewRequestSNSTopic
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt DebugQueue.QueueName
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShowDB
+        - SNSCrudPolicy:
+            TopicName: !GetAtt NewRequestSNSTopic.TopicName
+
   NewRequestSNSTopic:
     Type: "AWS::SNS::Topic"
     Properties:

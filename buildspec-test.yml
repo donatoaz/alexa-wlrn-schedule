@@ -14,11 +14,14 @@ phases:
   build:
     commands:
       - echo "Starting unit test `date` in `pwd`"
-      - ruby -I tests tests/unit/test_handler.rb
+      - |
+        ruby -I tests tests/unit/test_handler.rb && \
+        ruby -I tests tests/unit/test_cache_handler.rb && \
+        ruby -I tests tests/unit/test_handler.rb
   post_build:
     commands:
       - echo "build completed on `date`"
 
 artifacts:
   files:
-    - '**/*'
+    - "**/*"

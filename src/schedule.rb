@@ -1,4 +1,5 @@
 require 'json'
+require 'time'
 require 'aws-sdk-s3'
 require 'aws-sdk-sqs'
 require 'aws-sdk-sns'
@@ -41,8 +42,8 @@ class Intent
   end
 
   def show_time(event, context)
-    puts "Event is: #{event.inspect}"
-    puts "Context is: #{context.inspect}"
+    puts "[INFO] Event is: #{event.inspect}"
+    puts "[INFO] Context is: #{context.inspect}"
 
     response = nil
 
@@ -50,19 +51,28 @@ class Intent
 
     # Try and load response from cache
     cache = Aws::DynamoDB::Client.new(region: REGION)
-    params = {
+
+    request = {
+      key_condition_expression: '#show_name = :show_name',
+      expression_attribute_names: {
+        '#show_name' => 'show_name'
+      },
+      expression_attribute_values: {
+        ':show_name' => show_name.downcase
+      },
       table_name: ENV.fetch(SHOWS),
-      key: {
-        show_name: show_name.downcase
-      }
+      scan_index_forward: false
     }
+
+    puts "[INFO] request for dynamo: #{request}"
+
     begin
-      cached = cache.get_item(params)
-      response = cached.item['occurences'] unless cached.item.nil?
+      cached = cache.query(request)
+      response = get_closest_occurrence(cached.items)
 
       # logging
       if response.nil?
-        puts "[INFO] Cache miss for #{show_name}"
+        puts "[INFO] Cache miss for #{show_name}, response: #{response}"
       else
         puts "[INFO] Cache hit for #{show_name}: #{response}"
       end
@@ -71,9 +81,42 @@ class Intent
       return error_reading_cache
     end
 
-    reply = "<speak>I could not find any occurence of #{show_name} today</speak>"
+    return reply_with("<speak>I could not find any occurence of #{show_name} today</speak>") if response.nil?
 
-    reply_with(reply)
+    show_time = Time.iso8601(response['start_time_iso8601'])
+
+    if show_time > Time.now
+      if Date.today == show_time.to_date
+        return reply_with(
+          "<speak>#{show_name} will be on <say-as interpret-as=\"time\">#{show_time.strftime('%0l:%M %P')}</say-as> " \
+          'Miami time.</speak>'
+        )
+      else
+        return reply_with(
+          "<speak>#{show_name} will be on <say-as interpret-as=\"time\">#{show_time.strftime('%0l:%M %P')}</say-as> " \
+          "Miami time next #{show_time.strftime('%A')}.</speak>"
+        )
+      end
+    else
+      if Date.today == show_time.to_date
+        return reply_with(
+          "<speak>You missed #{show_name}, it was on " \
+          "<say-as interpret-as=\"time\">#{show_time.strftime('%0l:%M %P')}</say-as> " \
+          'Miami time.</speak>'
+        )
+      else
+        return reply_with(
+          "<speak>You missed #{show_name}, it was on " \
+          "<say-as interpret-as=\"time\">#{show_time.strftime('%0l:%M %P')}</say-as> " \
+          "Miami time last #{show_time.strftime('%A')}.</speak>"
+        )
+      end
+    end
+  end
+
+  def get_closest_occurrence(items)
+    # TODO: create logic for when there are multiple occurrences in the future
+    items.first
   end
 
   def slot_value(event:, slot_name:)

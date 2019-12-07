@@ -103,3 +103,4 @@ Next, you can use AWS Serverless Application Repository to deploy ready to use A
 - [x] Add CD
 - [] Add proper caching
 - [] Add show time alerts (via alexa notifications)
+- [] Add localization (know user's [local time](https://stackoverflow.com/questions/50714782/how-to-get-the-time-zone-or-local-time-of-alexa-device))
