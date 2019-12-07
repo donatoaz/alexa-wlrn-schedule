@@ -8,6 +8,7 @@ require 'httparty'
 
 REGION = 'us-east-1'.freeze
 CACHE = 'CACHE_TABLE'.freeze
+SHOWS = 'SHOWS_TABLE'.freeze
 MIAMI_TZ = '-05:00'.freeze
 DATE_FORMAT = '%Y-%m-%d'.freeze
 
@@ -22,6 +23,7 @@ def handler(event:, context:)
     case request['intent']['name']
     when 'Schedule'            then intent.schedule_now
     when 'NextOn'              then intent.schedule_next
+    when 'ShowTime'            then intent.show_time(event, context)
     when 'AMAZON.HelpIntent'   then intent.help
     when 'AMAZON.CancelIntent' then intent.cancel
     when 'AMAZON.StopIntent'   then intent.stop
@@ -36,6 +38,46 @@ class Intent
 
   def schedule_next
     schedule(coming_up: true)
+  end
+
+  def show_time(event, context)
+    puts "Event is: #{event.inspect}"
+    puts "Context is: #{context.inspect}"
+
+    response = nil
+
+    show_name = slot_value(event: event, slot_name: 'show_name')
+
+    # Try and load response from cache
+    cache = Aws::DynamoDB::Client.new(region: REGION)
+    params = {
+      table_name: ENV.fetch(SHOWS),
+      key: {
+        show_name: show_name.downcase
+      }
+    }
+    begin
+      cached = cache.get_item(params)
+      response = cached.item['occurences'] unless cached.item.nil?
+
+      # logging
+      if response.nil?
+        puts "[INFO] Cache miss for #{show_name}"
+      else
+        puts "[INFO] Cache hit for #{show_name}: #{response}"
+      end
+    rescue Aws::DynamoDB::Errors::ServiceError => error
+      warn "[ERROR] Error reading DynamoDB: #{error}"
+      return error_reading_cache
+    end
+
+    reply = "<speak>I could not find any occurence of #{show_name} today</speak>"
+
+    reply_with(reply)
+  end
+
+  def slot_value(event:, slot_name:)
+    event['request']['intent']['slots'][slot_name]['value']
   end
 
   def schedule(coming_up: false)
@@ -93,12 +135,16 @@ class Intent
         "<say-as interpret-as=\"time\">#{convert_to_am_pm(current_program[:next][:start_time])}</say-as> Miami time</speak>"
     end
 
+    reply_with(reply)
+  end
+
+  def reply_with(utterance)
     JSON.generate(
       version: 1.0,
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: reply
+          ssml: utterance
         },
         shouldEndSession: true
       }
