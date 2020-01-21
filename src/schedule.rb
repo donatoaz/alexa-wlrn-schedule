@@ -238,7 +238,8 @@ class Intent
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>This skill is say hello.</speak>'
+          ssml: '<speak>You can ask me things like: what is playing now or what will play next. You can also ' \
+                'ask me when will a certain programme be on, like: when will this american life be on.</speak>'
         },
         shouldEndSession: false
       }
@@ -251,7 +252,7 @@ class Intent
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>Cancel the skill.</speak>'
+          ssml: '<speak>Ok.</speak>'
         },
         shouldEndSession: true
       }
@@ -264,7 +265,7 @@ class Intent
       response: {
         outputSpeech: {
           type: 'SSML',
-          ssml: '<speak>Stop the skill.</speak>'
+          ssml: '<speak>Ok.</speak>'
         },
         shouldEndSession: true
       }
