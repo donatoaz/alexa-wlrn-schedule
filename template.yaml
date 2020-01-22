@@ -42,6 +42,29 @@ Resources:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt NewRequestSNSTopic.TopicName
 
+  DailyScheduleFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: daily.handler
+      Runtime: ruby2.5
+      Environment:
+        Variables:
+          WLRN_URL: "https://api.composer.nprstations.org/v1/widget/5187f4c7e1c8a450fdefbbd8/day?format=json&date="
+          CACHE_TABLE: !Ref Cache
+          NEW_REQUEST_SNS_TOPIC_ARN: !Ref NewRequestSNSTopic
+      Events:
+        CronJob:
+          Type: Schedule
+          Properties:
+            Description: Daily job to load cache with today's schedule
+            Schedule: cron(0 6 * * ? *) # run every day at 6am UTC
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Cache
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt NewRequestSNSTopic.TopicName
+
   WlrnScheduleCacheFunction:
     Type: AWS::Serverless::Function
     Properties:

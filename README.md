@@ -79,7 +79,7 @@ You can find more information and examples about filtering Lambda function logs 
 Tests are defined in the `tests` folder in this project.
 
 ```bash
-wlrnschedule$ ruby tests/unit/test_handler.rb
+wlrnschedule$ ruby -I tests tests/unit/test_handler.rb
 ```
 
 ## Cleanup
@@ -101,6 +101,6 @@ Next, you can use AWS Serverless Application Repository to deploy ready to use A
 
 - [x] Add CI
 - [x] Add CD
-- [] Add proper caching
+- [x] Add proper caching
 - [] Add show time alerts (via alexa notifications)
 - [] Add localization (know user's [local time](https://stackoverflow.com/questions/50714782/how-to-get-the-time-zone-or-local-time-of-alexa-device))
